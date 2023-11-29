@@ -131,5 +131,7 @@ def create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L_model, m_
         # compute tau
         tau = M @ f_prime + V + G
         
+        print(f"tau: {tau}")
+        
         return tau
     return controller
