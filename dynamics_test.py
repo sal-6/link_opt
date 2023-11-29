@@ -1,7 +1,7 @@
 from scipy.integrate import solve_ivp
 import numpy as np
 
-from robotics import state_dynamics
+from robotics import state_dynamics, no_input_controller, constant_input_controller, create_alpha_beta_controller
 from utilis import plot_end_position, plot_end_position_animation2, plot_joint_ends
 
 
@@ -19,16 +19,21 @@ def main():
     time_interval = t_eval[1] - t_eval[0] * 1000
     
     tol = 10**-13
+        
+    # alpha beta controller
+    q_goal = np.array([[np.pi/2], [0]])
+    q_dot_goal = np.array([[0], [0]])
+    q_dot_dot_goal = np.array([[0], [0]])
     
-    tau = np.array([[0.0], [0.0]])
+    Kp = np.array([[5, 0], [0, 5]])
+    Kv = np.array([[7, 0], [0, 7]])
     
-    sol = solve_ivp(state_dynamics, t_span, init_state, method='RK45', t_eval=t_eval, atol=tol, rtol=tol, args=(tau, L, m, g))
+    controller = create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L, m, g, Kp, Kv)
+    
+    sol = solve_ivp(state_dynamics, t_span, init_state, method='RK45', t_eval=t_eval, atol=tol, rtol=tol, args=(controller, L, m, g))
     
     plot_joint_ends(sol.t, sol.y, L, plot_interval=50)
 
-
     
-    
-
 if __name__ == "__main__":
     main()
