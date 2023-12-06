@@ -1,7 +1,7 @@
 from scipy.integrate import solve_ivp
 import numpy as np
 
-from robotics import state_dynamics, no_input_controller, constant_input_controller, create_alpha_beta_controller
+from robotics import *
 from utilis import plot_end_position, plot_end_position_animation2, plot_joint_ends
 
 
@@ -25,14 +25,21 @@ def main():
     q_dot_goal = np.array([[0], [0]])
     q_dot_dot_goal = np.array([[0], [0]])
     
-    Kp = np.array([[100, 0], [0, 2]])
-    Kv = np.array([[40, 0], [0, 50]])
+    Kp = np.array([[60, 0], [0, 60]])
+    Kv = np.array([[10, 0], [0, 10]])
     
     controller = create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L, m, g, Kp, Kv)
     
     sol = solve_ivp(state_dynamics, t_span, init_state, method='RK45', t_eval=t_eval, atol=tol, rtol=tol, args=(controller, L, m, g))
     
-    plot_joint_ends(sol.t, sol.y, L, plot_interval=50)
+    #plot_joint_ends(sol.t, sol.y, L, plot_interval=50)
+
+    ang_err = calculate_angular_error(sol.t, sol.y, q_goal, L)
+    pos_err = calculate_raw_end_effector_error(sol.t, sol.y, q_goal, L)
+
+    print(f"Overshoot: {angular_rise_overshoot(sol.t, ang_err)}")
+    print(f"Rise Time: {angular_rise_time(sol.t, ang_err)}")
+    print(f"Error: {raw_final_error(sol.t, pos_err)}")
 
     
 if __name__ == "__main__":

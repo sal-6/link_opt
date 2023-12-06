@@ -1,5 +1,6 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 def state_dynamics(t, state, controller, L, m, g):
     print(f"t: {t}")
@@ -137,7 +138,129 @@ def create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L_model, m_
     return controller
 
 
+def calculate_angular_overshoot_percentage(times, joint_angles, link_lengths, forward_kinematics, goal_joint_angles):
+    achieved_end_points = []
+    goal_end_points = []
 
-def calculate_angular_overshoot(t, states):
+    # Calculate achieved end points for each set of joint angles
+    for i in range(len(times)):
+        end_point = forward_kinematics(joint_angles[i], link_lengths)[:2]
+        achieved_end_points.append(end_point)
+    
+    # Calculate goal end points based on the goal joint angles
+    for goal_angles in goal_joint_angles:
+        goal_end_point = forward_kinematics(goal_angles, link_lengths)[:2]
+        goal_end_points.append(goal_end_point)
 
-    pass
+    # Calculate the difference between achieved and goal end points
+    total_angular_difference = 0
+    for i in range(len(achieved_end_points)):
+        diff = np.linalg.norm(achieved_end_points[i] - goal_end_points[i])
+        total_angular_difference += diff
+
+    # Calculate the total distance between achieved and goal end points
+    total_goal_distance = 0
+    for i in range(len(goal_end_points) - 1):
+        distance = np.linalg.norm(goal_end_points[i + 1] - goal_end_points[i])
+        total_goal_distance += distance
+
+    # Calculate the angular overshoot percentage
+    angular_overshoot_percentage = (total_angular_difference / total_goal_distance) * 100
+
+    return angular_overshoot_percentage
+
+
+def calculate_angular_error(t, states, q_goal, L):
+
+    goal_point = forward_kinematics([q_goal[0][0], q_goal[1][0]], L)
+    goal_point = np.array([[goal_point[0]], [goal_point[1]]])
+
+    goal_angle = np.arctan2(goal_point[1], goal_point[0])
+
+    error_over_time = []
+
+    for i in range(len(t)):
+        curr_state = states[:, i][:2]
+        curr_fwd = forward_kinematics(curr_state, L)
+
+        curr_fwd = np.array([[curr_fwd[0]], [curr_fwd[1]]])
+        curr_angle = np.arctan2(curr_fwd[1], curr_fwd[0])
+
+        curr_error = goal_angle - curr_angle
+
+        error_over_time.append(curr_error)
+
+    
+    plt.figure()
+    plt.plot(t, error_over_time)
+    plt.show()
+
+    return error_over_time
+    
+
+def calculate_raw_end_effector_error(t, states, q_goal, L):
+
+    goal_point = forward_kinematics([q_goal[0][0], q_goal[1][0]], L)
+    goal_point = np.array([[goal_point[0]], [goal_point[1]]])
+
+    error_over_time = []
+
+    for i in range(len(t)):
+        curr_state = states[:, i][:2]
+        curr_fwd = forward_kinematics(curr_state, L)
+
+        curr_fwd = np.array([[curr_fwd[0]], [curr_fwd[1]]])
+        curr_error = goal_point - curr_fwd
+
+        error_mag = np.sqrt(curr_error[0][0] ** 2 + curr_error[1][0] ** 2)
+
+        error_over_time.append(error_mag)
+
+    #plt.figure()
+    #plt.plot(t, error_over_time)
+    #plt.show()
+
+    return error_over_time
+
+
+def angular_rise_overshoot(t, ang_err_arr):
+
+    init_value = ang_err_arr[0]
+
+    # check if it overshot
+    overshot = False
+    for i in range(len(t) - 1):
+        if ang_err_arr[i] * ang_err_arr[i+1] <= 0:
+            overshot = True
+
+    if not overshot:
+        return 0
+    
+    overshot_mag = abs(min(ang_err_arr))
+
+    percent_overshoot = overshot_mag[0] / init_value[0] * 100
+
+    return percent_overshoot
+
+
+def angular_rise_time(t, ang_err_arr):
+    # calculate how long it takes to get within 5 percent of the target angular point
+    
+    init_value = ang_err_arr[0]
+    
+    threshold = init_value * 0.05
+
+    for i in range(len(t)):
+        if ang_err_arr[i] < threshold:
+            return t[i]
+
+    # never makes it to threshold
+    return 50
+
+
+def raw_final_error(t, end_eff_err_arr):
+
+    return end_eff_err_arr[-1]
+
+
+
