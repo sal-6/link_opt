@@ -11,7 +11,7 @@ def main():
     m = np.array([1.0, 1.0])
     g = 9.81
     
-    init_state = np.array([0.0, 0.0, 0.0, 0.0])
+    init_state = np.array([-np.pi/2, np.pi/4, 0.0, 0.0])
     
     t_span = (0.0, 10.0)
     t_eval = np.linspace(t_span[0], t_span[1], 1000)
@@ -25,8 +25,8 @@ def main():
     q_dot_goal = np.array([[0], [0]])
     q_dot_dot_goal = np.array([[0], [0]])
     
-    Kp = np.array([[2, 0], [0, 2]])
-    Kv = np.array([[1, 0], [0, 1]])
+    Kp = np.array([[100, 0], [0, 2]])
+    Kv = np.array([[40, 0], [0, 50]])
     
     controller = create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L, m, g, Kp, Kv)
     
