@@ -25,8 +25,8 @@ def main():
     q_dot_goal = np.array([[0], [0]])
     q_dot_dot_goal = np.array([[0], [0]])
     
-    Kp = np.array([[5, 0], [0, 5]])
-    Kv = np.array([[7, 0], [0, 7]])
+    Kp = np.array([[2, 0], [0, 2]])
+    Kv = np.array([[1, 0], [0, 1]])
     
     controller = create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L, m, g, Kp, Kv)
     
