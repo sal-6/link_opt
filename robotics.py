@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def state_dynamics(t, state, controller, L, m, g):
-    print(f"t: {t}")
+    #print(f"t: {t}")
     
     # get current position and velocity
     _q = state[0:2] # joint angles
@@ -132,7 +132,7 @@ def create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L_model, m_
         # compute tau
         tau = M @ f_prime + V + G
         
-        print(f"tau: {tau}")
+        #print(f"tau: {tau}")
         
         return tau
     return controller
@@ -191,9 +191,9 @@ def calculate_angular_error(t, states, q_goal, L):
         error_over_time.append(curr_error)
 
     
-    plt.figure()
-    plt.plot(t, error_over_time)
-    plt.show()
+    #plt.figure()
+    #plt.plot(t, error_over_time)
+    #plt.show()
 
     return error_over_time
     

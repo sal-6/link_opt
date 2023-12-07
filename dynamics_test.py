@@ -25,14 +25,14 @@ def main():
     q_dot_goal = np.array([[0], [0]])
     q_dot_dot_goal = np.array([[0], [0]])
     
-    Kp = np.array([[60, 0], [0, 60]])
-    Kv = np.array([[10, 0], [0, 10]])
+    Kp = np.array([[44.96, 0], [0, 50.0]])
+    Kv = np.array([[3.18, 0], [0, 2.20]])
     
     controller = create_alpha_beta_controller(q_goal, q_dot_goal, q_dot_dot_goal, L, m, g, Kp, Kv)
     
     sol = solve_ivp(state_dynamics, t_span, init_state, method='RK45', t_eval=t_eval, atol=tol, rtol=tol, args=(controller, L, m, g))
     
-    #plot_joint_ends(sol.t, sol.y, L, plot_interval=50)
+    plot_joint_ends(sol.t, sol.y, L, plot_interval=50)
 
     ang_err = calculate_angular_error(sol.t, sol.y, q_goal, L)
     pos_err = calculate_raw_end_effector_error(sol.t, sol.y, q_goal, L)
@@ -44,3 +44,12 @@ def main():
     
 if __name__ == "__main__":
     main()
+    
+    # run 1 (
+    # WEIGHT_ANG_RISE = 10
+    # WEIGHT_ANG_OVERSHOOT = 25
+    # WEIGHT_RAW_ERR = 20)
+    #Kp1: 19.56
+    #Kp2: 17.6
+    #Kv1: 11.68
+    #Kv2: 3.24
